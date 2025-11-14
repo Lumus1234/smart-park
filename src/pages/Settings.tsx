@@ -2,8 +2,11 @@ import { Moon, Bell, MapPin, RefreshCw, ChevronRight, Shield, Info, LogOut } fro
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "next-themes";
 
 const Settings = () => {
+  const { theme, setTheme } = useTheme();
+  
   const settingsSections = [
     {
       title: "Appearance",
@@ -95,7 +98,14 @@ const Settings = () => {
                   )}
                 </div>
                 {item.hasSwitch && (
-                  <Switch defaultChecked={item.defaultChecked} />
+                  <Switch 
+                    checked={item.label === "Dark Mode" ? theme === "dark" : item.defaultChecked}
+                    onCheckedChange={(checked) => {
+                      if (item.label === "Dark Mode") {
+                        setTheme(checked ? "dark" : "light");
+                      }
+                    }}
+                  />
                 )}
                 {item.hasArrow && (
                   <ChevronRight className="h-5 w-5 text-muted-foreground" />

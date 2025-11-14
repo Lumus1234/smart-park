@@ -2,9 +2,11 @@ import { Bell, MapPin, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
+import { toast } from "@/hooks/use-toast";
 
 const Monitored = () => {
-  const monitoredLocations = [
+  const [monitoredLocations, setMonitoredLocations] = useState([
     {
       id: "1",
       name: "Hospital Parking",
@@ -12,8 +14,27 @@ const Monitored = () => {
       spots: "0/40 spots",
       price: "$4/hr",
       status: "full",
+      notificationsEnabled: true,
     },
-  ];
+  ]);
+
+  const handleRemoveLocation = (id: string) => {
+    setMonitoredLocations(prev => prev.filter(loc => loc.id !== id));
+    toast({
+      title: "Location removed",
+      description: "You will no longer receive notifications for this location",
+    });
+  };
+
+  const handleToggleNotifications = (id: string) => {
+    setMonitoredLocations(prev => 
+      prev.map(loc => 
+        loc.id === id 
+          ? { ...loc, notificationsEnabled: !loc.notificationsEnabled }
+          : loc
+      )
+    );
+  };
 
   return (
     <div className="p-4 space-y-4">
@@ -56,7 +77,10 @@ const Monitored = () => {
                   </div>
                 </div>
               </div>
-              <button className="text-destructive hover:text-destructive/80 transition-colors p-2">
+              <button 
+                onClick={() => handleRemoveLocation(location.id)}
+                className="text-destructive hover:text-destructive/80 transition-colors p-2"
+              >
                 <Trash2 className="h-5 w-5" />
               </button>
             </div>
@@ -64,9 +88,14 @@ const Monitored = () => {
             <div className="flex items-center justify-between pt-3 border-t border-border">
               <div className="flex items-center gap-2 text-sm">
                 <Bell className="h-4 w-4 text-primary" />
-                <span className="font-medium">Notifications On</span>
+                <span className="font-medium">
+                  Notifications {location.notificationsEnabled ? "On" : "Off"}
+                </span>
               </div>
-              <Switch defaultChecked />
+              <Switch 
+                checked={location.notificationsEnabled}
+                onCheckedChange={() => handleToggleNotifications(location.id)}
+              />
             </div>
           </Card>
         ))}
