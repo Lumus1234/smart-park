@@ -1,8 +1,9 @@
-import { Search, MapPin, Star, Clock, Users, DollarSign } from "lucide-react";
+import { Search, MapPin, Star, Clock, Users, DollarSign, Navigation } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 
 const Home = () => {
   const [activeFilter, setActiveFilter] = useState("All");
@@ -12,6 +13,24 @@ const Home = () => {
   });
 
   const filters = ["All", "Free Only", "Paid Only", "Available Only"];
+
+  const allParkingSpots = [
+    { id: 1, name: "Hospital Parking", x: 20, y: 30, status: "full", type: "paid", price: "$4/hr", spots: "0/40" },
+    { id: 2, name: "City Center", x: 45, y: 45, status: "available", type: "paid", price: "$3/hr", spots: "28/50" },
+    { id: 3, name: "Mall Plaza", x: 65, y: 25, status: "limited", type: "paid", price: "$2.5/hr", spots: "8/60" },
+    { id: 4, name: "Park & Ride", x: 80, y: 60, status: "available", type: "free", price: "Free", spots: "45/80" },
+    { id: 5, name: "Beach Area", x: 30, y: 70, status: "available", type: "free", price: "Free", spots: "22/30" },
+    { id: 6, name: "Stadium North", x: 55, y: 80, status: "limited", type: "paid", price: "$5/hr", spots: "5/45" },
+    { id: 7, name: "Library", x: 75, y: 40, status: "available", type: "free", price: "Free", spots: "18/25" },
+    { id: 8, name: "Train Station", x: 40, y: 55, status: "full", type: "paid", price: "$4.5/hr", spots: "0/70" },
+  ];
+
+  const filteredSpots = allParkingSpots.filter(spot => {
+    if (activeFilter === "Free Only") return spot.type === "free";
+    if (activeFilter === "Paid Only") return spot.type === "paid";
+    if (activeFilter === "Available Only") return spot.status === "available";
+    return true;
+  });
 
   const stats = [
     { label: "Total Available", value: "329", subtext: "of 695 spots", icon: Users, color: "text-primary" },
@@ -115,29 +134,70 @@ const Home = () => {
       </div>
 
       {/* Map Section */}
-      <Card className="h-64 rounded-xl overflow-hidden relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-muted to-accent flex items-center justify-center">
-          <div className="text-center space-y-3">
-            <MapPin className="h-12 w-12 text-primary mx-auto" />
-            <div>
-              <p className="text-sm font-medium">Interactive Map</p>
-              <p className="text-xs text-muted-foreground">Parking locations nearby</p>
+      <Card className="h-80 rounded-xl overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-muted via-accent to-muted/50">
+          {/* Map Grid */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="grid grid-cols-8 grid-rows-8 h-full">
+              {Array.from({ length: 64 }).map((_, i) => (
+                <div key={i} className="border border-foreground/20" />
+              ))}
             </div>
-            <div className="flex gap-4 justify-center text-xs">
-              <div className="flex items-center gap-1">
+          </div>
+          
+          {/* Parking Markers */}
+          {filteredSpots.map(spot => (
+            <div
+              key={spot.id}
+              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
+              style={{ left: `${spot.x}%`, top: `${spot.y}%` }}
+            >
+              <div className="relative">
+                {/* Pulse animation for available spots */}
+                {spot.status === "available" && (
+                  <div className="absolute inset-0 rounded-full bg-success opacity-75 animate-ping" />
+                )}
+                {/* Marker */}
+                <div className={`relative w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:scale-125 ${
+                  spot.status === "available" ? "bg-success" :
+                  spot.status === "limited" ? "bg-warning" :
+                  "bg-destructive"
+                }`}>
+                  <MapPin className="h-5 w-5 text-white" />
+                </div>
+                {/* Tooltip */}
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  <div className="bg-card border border-border rounded-lg p-2 shadow-xl whitespace-nowrap">
+                    <p className="text-xs font-semibold">{spot.name}</p>
+                    <p className="text-xs text-muted-foreground">{spot.spots} • {spot.price}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          {/* Map Legend */}
+          <div className="absolute bottom-4 left-4 bg-card/95 backdrop-blur-sm rounded-lg p-3 shadow-lg">
+            <div className="flex gap-4 text-xs">
+              <div className="flex items-center gap-1.5">
                 <div className="h-3 w-3 rounded-full bg-success" />
                 <span>Available</span>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 <div className="h-3 w-3 rounded-full bg-warning" />
                 <span>Limited</span>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 <div className="h-3 w-3 rounded-full bg-destructive" />
                 <span>Full</span>
               </div>
             </div>
           </div>
+
+          {/* My Location Button */}
+          <button className="absolute top-4 right-4 bg-card rounded-lg p-2 shadow-lg hover:bg-accent transition-colors">
+            <Navigation className="h-5 w-5 text-primary" />
+          </button>
         </div>
       </Card>
     </div>
