@@ -1,12 +1,15 @@
-import { Search, MapPin, Star, Clock, Users, DollarSign, Navigation } from "lucide-react";
+import { Search, MapPin, Star, Clock, Users, DollarSign, Navigation, Bell } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "@/hooks/use-toast";
 
 const Home = () => {
   const [activeFilter, setActiveFilter] = useState("All");
+  const [selectedSpot, setSelectedSpot] = useState<any>(null);
   const currentTime = new Date().toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
@@ -15,14 +18,126 @@ const Home = () => {
   const filters = ["All", "Free Only", "Paid Only", "Available Only"];
 
   const allParkingSpots = [
-    { id: 1, name: "Hospital Parking", x: 20, y: 30, status: "full", type: "paid", price: "$4/hr", spots: "0/40" },
-    { id: 2, name: "City Center", x: 45, y: 45, status: "available", type: "paid", price: "$3/hr", spots: "28/50" },
-    { id: 3, name: "Mall Plaza", x: 65, y: 25, status: "limited", type: "paid", price: "$2.5/hr", spots: "8/60" },
-    { id: 4, name: "Park & Ride", x: 80, y: 60, status: "available", type: "free", price: "Free", spots: "45/80" },
-    { id: 5, name: "Beach Area", x: 30, y: 70, status: "available", type: "free", price: "Free", spots: "22/30" },
-    { id: 6, name: "Stadium North", x: 55, y: 80, status: "limited", type: "paid", price: "$5/hr", spots: "5/45" },
-    { id: 7, name: "Library", x: 75, y: 40, status: "available", type: "free", price: "Free", spots: "18/25" },
-    { id: 8, name: "Train Station", x: 40, y: 55, status: "full", type: "paid", price: "$4.5/hr", spots: "0/70" },
+    { 
+      id: 1, 
+      name: "Hospital Parking", 
+      area: "South",
+      x: 20, 
+      y: 30, 
+      status: "full", 
+      type: "paid", 
+      price: "$4/hr", 
+      spots: "0/40",
+      schedule: [
+        { days: "Mon - Sun", time: "All Day", rate: "$4/hr" },
+      ]
+    },
+    { 
+      id: 2, 
+      name: "City Center", 
+      area: "Downtown",
+      x: 45, 
+      y: 45, 
+      status: "available", 
+      type: "paid", 
+      price: "$3/hr", 
+      spots: "28/50",
+      schedule: [
+        { days: "Mon - Fri", time: "7:00 AM - 6:00 PM", rate: "$3/hr" },
+        { days: "Mon - Fri", time: "6:00 PM - 11:59 PM", rate: "$1.5/hr" },
+        { days: "Sat, Sun", time: "All Day", rate: "$2/hr" },
+      ]
+    },
+    { 
+      id: 3, 
+      name: "Mall Plaza", 
+      area: "West",
+      x: 65, 
+      y: 25, 
+      status: "limited", 
+      type: "paid", 
+      price: "$2.5/hr", 
+      spots: "8/60",
+      freeIn: "1h 45m",
+      schedule: [
+        { days: "Mon - Fri", time: "9:00 AM - 9:00 PM", rate: "$2.5/hr" },
+        { days: "Sat, Sun", time: "9:00 AM - 9:00 PM", rate: "$3/hr" },
+      ]
+    },
+    { 
+      id: 4, 
+      name: "Park & Ride", 
+      area: "North",
+      x: 80, 
+      y: 60, 
+      status: "available", 
+      type: "free", 
+      price: "Free", 
+      spots: "45/80",
+      schedule: [
+        { days: "Mon - Sun", time: "All Day", rate: "Free" },
+      ]
+    },
+    { 
+      id: 5, 
+      name: "Beach Area", 
+      area: "Waterfront",
+      x: 30, 
+      y: 70, 
+      status: "available", 
+      type: "free", 
+      price: "Free", 
+      spots: "22/30",
+      schedule: [
+        { days: "Mon - Sun", time: "All Day", rate: "Free" },
+      ]
+    },
+    { 
+      id: 6, 
+      name: "Stadium North", 
+      area: "Sports District",
+      x: 55, 
+      y: 80, 
+      status: "limited", 
+      type: "paid", 
+      price: "$5/hr", 
+      spots: "5/45",
+      schedule: [
+        { days: "Mon - Fri", time: "All Day", rate: "$3/hr" },
+        { days: "Sat, Sun", time: "All Day", rate: "$5/hr" },
+      ]
+    },
+    { 
+      id: 7, 
+      name: "Library Street", 
+      area: "Downtown",
+      x: 75, 
+      y: 40, 
+      status: "available", 
+      type: "free", 
+      price: "Free", 
+      spots: "18/25",
+      schedule: [
+        { days: "Mon - Sun", time: "All Day", rate: "Free" },
+      ]
+    },
+    { 
+      id: 8, 
+      name: "University Campus", 
+      area: "University",
+      x: 40, 
+      y: 55, 
+      status: "limited", 
+      type: "paid", 
+      price: "$2/hr", 
+      spots: "5/35",
+      freeIn: "2h 36m",
+      schedule: [
+        { days: "Sun, Sat", time: "5:00 AM - 11:59 PM", rate: "Free" },
+        { days: "Mon, Tue, Wed, Thu, Fri", time: "7:00 AM - 5:00 PM", rate: "$2/hr" },
+        { days: "Mon, Tue, Wed, Thu, Fri", time: "5:00 PM - 11:59 PM", rate: "Free" },
+      ]
+    },
   ];
 
   const filteredSpots = allParkingSpots.filter(spot => {
@@ -31,6 +146,16 @@ const Home = () => {
     if (activeFilter === "Available Only") return spot.status === "available";
     return true;
   });
+
+  const handleMonitorLocation = () => {
+    if (selectedSpot) {
+      toast({
+        title: "Location monitored",
+        description: `You will be notified when ${selectedSpot.name} has available spots`,
+      });
+      setSelectedSpot(null);
+    }
+  };
 
   const stats = [
     { label: "Total Available", value: "329", subtext: "of 695 spots", icon: Users, color: "text-primary" },
@@ -75,7 +200,7 @@ const Home = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <button className="flex flex-col items-center gap-2 p-3 rounded-xl bg-card hover:bg-accent transition-colors">
           <Star className="h-5 w-5 text-warning fill-warning" />
           <span className="text-xs font-medium">Favorites</span>
@@ -85,12 +210,8 @@ const Home = () => {
           <span className="text-xs font-medium">Recent</span>
         </button>
         <button className="flex flex-col items-center gap-2 p-3 rounded-xl bg-card hover:bg-accent transition-colors">
-          <MapPin className="h-5 w-5 text-success" />
-          <span className="text-xs font-medium">Nearby</span>
-        </button>
-        <button className="flex flex-col items-center gap-2 p-3 rounded-xl bg-card hover:bg-accent transition-colors">
-          <Clock className="h-5 w-5 text-purple-500" />
-          <span className="text-xs font-medium">Reserve</span>
+          <Navigation className="h-5 w-5 text-success" />
+          <span className="text-xs font-medium">Navigate</span>
         </button>
       </div>
 
@@ -149,6 +270,7 @@ const Home = () => {
           {filteredSpots.map(spot => (
             <div
               key={spot.id}
+              onClick={() => setSelectedSpot(spot)}
               className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
               style={{ left: `${spot.x}%`, top: `${spot.y}%` }}
             >
@@ -200,6 +322,137 @@ const Home = () => {
           </button>
         </div>
       </Card>
+
+      {/* Parking Spot Dialog */}
+      <Dialog open={!!selectedSpot} onOpenChange={() => setSelectedSpot(null)}>
+        <DialogContent className="sm:max-w-md">
+          {selectedSpot && (
+            <div className="space-y-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <DialogTitle className="text-xl font-bold mb-1">
+                    {selectedSpot.name}
+                  </DialogTitle>
+                  <p className="text-sm text-muted-foreground">{selectedSpot.area}</p>
+                </div>
+                <Badge variant={selectedSpot.type === "free" ? "secondary" : "default"}>
+                  {selectedSpot.type === "free" ? "Free" : "Paid"}
+                </Badge>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Availability</p>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold">{selectedSpot.spots} spots</span>
+                    <Badge
+                      variant={
+                        selectedSpot.status === "available" ? "default" :
+                        selectedSpot.status === "limited" ? "secondary" : "destructive"
+                      }
+                      className={
+                        selectedSpot.status === "available" ? "bg-success text-white" :
+                        selectedSpot.status === "limited" ? "bg-warning text-warning-foreground" : ""
+                      }
+                    >
+                      {selectedSpot.status === "available" ? "Good Availability" :
+                       selectedSpot.status === "limited" ? "Limited Spaces" : "Full"}
+                    </Badge>
+                  </div>
+                  <div className="w-full h-2 bg-muted rounded-full">
+                    <div
+                      className={`h-full rounded-full ${
+                        selectedSpot.status === "available" ? "bg-success" :
+                        selectedSpot.status === "limited" ? "bg-warning" : "bg-destructive"
+                      }`}
+                      style={{
+                        width: `${
+                          selectedSpot.status === "available" ? "75%" :
+                          selectedSpot.status === "limited" ? "25%" : "5%"
+                        }`
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between py-3 border-y border-border">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Parking Rate</span>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold">{selectedSpot.price}</p>
+                    {selectedSpot.freeIn && (
+                      <p className="text-xs text-success flex items-center gap-1 justify-end">
+                        <Clock className="h-3 w-3" />
+                        Free in {selectedSpot.freeIn}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">Current Status</span>
+                  </div>
+                  <span className={
+                    selectedSpot.status === "available" ? "text-success font-semibold" :
+                    selectedSpot.status === "limited" ? "text-warning font-semibold" : 
+                    "text-destructive font-semibold"
+                  }>
+                    {selectedSpot.status === "available" ? "Good Availability" :
+                     selectedSpot.status === "limited" ? "Limited Spaces" : "Full"}
+                  </span>
+                </div>
+
+                {selectedSpot.schedule && selectedSpot.schedule.length > 1 && (
+                  <div className="bg-muted/50 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Clock className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-medium">Pricing Schedule</span>
+                    </div>
+                    <div className="space-y-2">
+                      {selectedSpot.schedule.map((schedule: any, idx: number) => (
+                        <div key={idx} className="flex items-center justify-between text-sm py-2 border-b border-border last:border-0">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={`h-2 w-2 rounded-full ${schedule.rate === "Free" ? "bg-success" : "bg-primary"}`} />
+                              <span className="font-medium">{schedule.days}</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground ml-4">
+                              <Clock className="h-3 w-3 inline mr-1" />
+                              {schedule.time}
+                            </p>
+                          </div>
+                          <span className={`font-semibold ${schedule.rate === "Free" ? "text-success" : ""}`}>
+                            {schedule.rate}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <Button className="w-full h-12 rounded-xl">
+                  <Navigation className="h-5 w-5 mr-2" />
+                  Get Directions
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full h-12 rounded-xl"
+                  onClick={handleMonitorLocation}
+                >
+                  <Bell className="h-5 w-5 mr-2" />
+                  Monitor Location
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
