@@ -1,9 +1,24 @@
-import { Edit, MapPin, Clock, DollarSign, TrendingUp, Calendar } from "lucide-react";
+import { MapPin, Clock, DollarSign, TrendingUp, Calendar } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useState } from "react";
+import { toast } from "@/hooks/use-toast";
 
 const Profile = () => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState("Alex Johnson");
+  const [email, setEmail] = useState("alex.johnson@email.com");
+  const [phone, setPhone] = useState("+1 (555) 123-4567");
+
+  const handleSave = () => {
+    setIsEditing(false);
+    toast({
+      title: "Profile updated",
+      description: "Your profile has been successfully updated",
+    });
+  };
   const stats = [
     { label: "Total Sessions", value: "127", icon: MapPin, color: "text-primary", bgColor: "bg-primary/10" },
     { label: "Hours Parked", value: "342h", icon: Clock, color: "text-success", bgColor: "bg-success/10" },
@@ -24,39 +39,73 @@ const Profile = () => {
       <Card className="p-6 rounded-xl">
         <div className="flex items-start gap-4 mb-4">
           <div className="h-16 w-16 rounded-full bg-primary flex items-center justify-center">
-            <span className="text-2xl font-bold text-primary-foreground">AJ</span>
+            <span className="text-2xl font-bold text-primary-foreground">
+              {name.split(' ').map(n => n[0]).join('')}
+            </span>
           </div>
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-xl font-bold">Alex Johnson</h2>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Edit className="h-4 w-4" />
-              </Button>
-            </div>
-            <Badge variant="secondary" className="text-xs">
-              Premium Member
-            </Badge>
+            <h2 className="text-xl font-bold">{name}</h2>
           </div>
         </div>
 
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-            <span>alex.johnson@email.com</span>
+        {isEditing ? (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleSave} className="flex-1">Save</Button>
+              <Button onClick={() => setIsEditing(false)} variant="outline" className="flex-1">Cancel</Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-            </svg>
-            <span>+1 (555) 123-4567</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            <span>Member since 6/15/2023</span>
-          </div>
-        </div>
+        ) : (
+          <>
+            <div className="space-y-2 text-sm mb-4">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <span>{email}</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                <span>{phone}</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                <span>Member since 6/15/2023</span>
+              </div>
+            </div>
+            <Button onClick={() => setIsEditing(true)} variant="outline" className="w-full">
+              Edit Profile
+            </Button>
+          </>
+        )}
       </Card>
 
       {/* Parking Statistics */}
