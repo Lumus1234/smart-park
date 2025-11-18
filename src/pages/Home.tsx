@@ -20,10 +20,23 @@ const Home = () => {
   // Calculate status based on spot availability
   const calculateStatus = (spotsStr: string): "available" | "limited" | "full" => {
     const [available, total] = spotsStr.split('/').map(Number);
-    if (available === 0) return "full";
     const taken = total - available;
     const percentageTaken = (taken / total) * 100;
-    return percentageTaken >= 70 ? "limited" : "available";
+    
+    console.log(`Parking: ${spotsStr} | Taken: ${taken}/${total} (${percentageTaken.toFixed(1)}%)`);
+    
+    if (available === 0) {
+      console.log(`  -> Status: FULL (100% taken)`);
+      return "full";
+    }
+    
+    if (percentageTaken >= 70) {
+      console.log(`  -> Status: LIMITED (>=70% taken)`);
+      return "limited";
+    }
+    
+    console.log(`  -> Status: AVAILABLE (<70% taken)`);
+    return "available";
   };
 
   const allParkingSpots = [
