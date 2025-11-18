@@ -17,6 +17,15 @@ const Home = () => {
 
   const filters = ["All", "Free Only", "Paid Only", "Available Only"];
 
+  // Calculate status based on spot availability
+  const calculateStatus = (spotsStr: string): "available" | "limited" | "full" => {
+    const [available, total] = spotsStr.split('/').map(Number);
+    if (available === 0) return "full";
+    const taken = total - available;
+    const percentageTaken = (taken / total) * 100;
+    return percentageTaken >= 70 ? "limited" : "available";
+  };
+
   const allParkingSpots = [
     { 
       id: 1, 
@@ -24,7 +33,6 @@ const Home = () => {
       area: "South",
       x: 20, 
       y: 30, 
-      status: "full", 
       type: "paid", 
       price: "$4/hr", 
       spots: "0/40",
@@ -38,7 +46,6 @@ const Home = () => {
       area: "Downtown",
       x: 45, 
       y: 45, 
-      status: "available", 
       type: "paid", 
       price: "$3/hr", 
       spots: "28/50",
@@ -54,7 +61,6 @@ const Home = () => {
       area: "West",
       x: 65, 
       y: 25, 
-      status: "limited", 
       type: "paid", 
       price: "$2.5/hr", 
       spots: "8/60",
@@ -70,7 +76,6 @@ const Home = () => {
       area: "North",
       x: 80, 
       y: 60, 
-      status: "available", 
       type: "free", 
       price: "Free", 
       spots: "45/80",
@@ -84,7 +89,6 @@ const Home = () => {
       area: "Waterfront",
       x: 30, 
       y: 70, 
-      status: "available", 
       type: "free", 
       price: "Free", 
       spots: "22/30",
@@ -98,7 +102,6 @@ const Home = () => {
       area: "Sports District",
       x: 55, 
       y: 80, 
-      status: "limited", 
       type: "paid", 
       price: "$5/hr", 
       spots: "5/45",
@@ -113,7 +116,6 @@ const Home = () => {
       area: "Downtown",
       x: 75, 
       y: 40, 
-      status: "available", 
       type: "free", 
       price: "Free", 
       spots: "18/25",
@@ -127,7 +129,6 @@ const Home = () => {
       area: "University",
       x: 40, 
       y: 55, 
-      status: "limited", 
       type: "paid", 
       price: "$2/hr", 
       spots: "5/35",
@@ -138,7 +139,10 @@ const Home = () => {
         { days: "Mon, Tue, Wed, Thu, Fri", time: "5:00 PM - 11:59 PM", rate: "Free" },
       ]
     },
-  ];
+  ].map(spot => ({
+    ...spot,
+    status: calculateStatus(spot.spots)
+  }));
 
   const filteredSpots = allParkingSpots.filter(spot => {
     if (activeFilter === "Free Only") return spot.type === "free";
